@@ -4,7 +4,7 @@
 PlayerSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 28
-  productGUID: 1c4b563bfdf0b0b43a2fff48e3d3ea99
+  productGUID: fc86ebb0a19f883469eecdf6df9728e9
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
   AndroidEnableSustainedPerformanceMode: 0
@@ -871,10 +871,10 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 1
   windowsGamepadBackendHint: 0
-  cloudProjectId: 2436e0cd-0914-47eb-845e-fed9b334428f
+  cloudProjectId: f3684206-7af2-4960-90f9-cad8db4d11d5
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: BattleJack
+  projectName: BattleJack 2026-04-25_17-22-13
   organizationId: ktc-mente
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
