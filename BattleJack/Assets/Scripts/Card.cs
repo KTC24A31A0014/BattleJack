@@ -1,21 +1,41 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class Data
-{
-    public Mark Mark;
-    public int Number;
 
-    // MarkとNumberから対応する画像をAssetフォルダから取得
-    public Sprite GetSprite()
-    {
-        string markName = Mark.ToString().ToLower();
-        string path = $"Card"
-    }
-}
 
 public class Card : MonoBehaviour
 {
+    public class Data
+    {
+        public Mark Mark;
+        public int Number;
+
+        // MarkとNumberから対応する画像をAssetフォルダから取得
+        public Sprite GetSprite()
+        {
+            string folderName;
+            string prefix;
+
+            switch (Mark)
+            {
+                case Card.Mark.Spade:   folderName = "1.Spade";     prefix = "s"; break;
+                case Card.Mark.Club :   folderName = "2.Club" ;     prefix = "c"; break;
+                case Card.Mark.Heart:   folderName = "3.Heart";     prefix = "h"; break;
+                case Card.Mark.Diamond: folderName = "4.Diamond";   prefix = "d"; break;
+
+                default:                folderName = "1.Spade";     prefix = "s"; break;
+            }
+
+            string path = $"Card/{folderName}/playingCards_{prefix}{Number}";
+            return Resources.Load<Sprite>(path);
+        }
+
+        public static Sprite GetBackSprite()
+        {
+            return Resources.Load<Sprite>("Cards/back");
+        }
+    }
+
     public enum Mark
     {
         Heart,
