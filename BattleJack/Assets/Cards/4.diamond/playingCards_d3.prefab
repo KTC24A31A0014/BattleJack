@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8390453658490808292}
   - component: {fileID: 3137582847983632034}
+  - component: {fileID: -742169156481863790}
   m_Layer: 0
   m_Name: playingCards_d3
   m_TagString: Untagged
@@ -91,3 +92,16 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &-742169156481863790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4596435071477717922}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8e3e1c2ba18e064482b53cea6d61bb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  IsReverse: 0
