@@ -5,10 +5,27 @@ public class Hand : MonoBehaviour
 {
     private List<Card> _cards = new List<Card>();
 
+    [SerializeField] private float cardSpacing = 240f;
+
     // 手札にカードを追加
     public void AddCard(Card card)
     {
         _cards.Add(card);
+        ArrangeCards();
+    }
+
+    // カードを横に並べる
+    private void ArrangeCards()
+    {
+        int count = _cards.Count;
+        float totalWidth = (count - 1) * cardSpacing;
+        float startX = -totalWidth / 2f;
+
+        for (int i = 0; i < count; i++)
+        {
+            RectTransform rt = _cards[i].GetComponent<RectTransform>();
+            rt.anchoredPosition = new Vector2(startX + i * cardSpacing, 0);
+        }
     }
 
     // ラウンド終了時ー手札をすべて捨てる

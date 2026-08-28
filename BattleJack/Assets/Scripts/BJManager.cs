@@ -151,7 +151,7 @@ public class BJManager : MonoBehaviour
 
     private Card AddCardToDL(bool isReverse)
     {
-        Card card = deck.DrawCard(dealerHandTransform);
+        Card card = deck.DrawCard(dealerHandTransform, isReverse);
         dealerHand.AddCard(card);
         return card;
     }

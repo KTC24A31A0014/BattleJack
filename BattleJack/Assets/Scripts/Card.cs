@@ -32,21 +32,22 @@ public class Card : MonoBehaviour
 
             switch (Mark)
             {
-                case Mark.Spade:   folderName = "1.Spade";     prefix = "s"; break;
-                case Mark.Club :   folderName = "2.Club" ;     prefix = "c"; break;
-                case Mark.Heart:   folderName = "3.Heart";     prefix = "h"; break;
-                case Mark.Diamond: folderName = "4.Diamond";   prefix = "d"; break;
+                case Mark.Spade:   folderName = "1.spade";     prefix = "s"; break;
+                case Mark.Club :   folderName = "2.club" ;     prefix = "c"; break;
+                case Mark.Heart:   folderName = "3.heart";     prefix = "h"; break;
+                case Mark.Diamond: folderName = "4.diamond";   prefix = "d"; break;
 
                 default:                folderName = "1.Spade";     prefix = "s"; break;
             }
 
-            string path = $"Card/{folderName}/playingCards_{prefix}{Number}";
+            string path = $"Cards/{folderName}/playingCards_{prefix}{Number}";
+            Debug.Log($"LoadPath: {path}"); // ← 追加
             return Resources.Load<Sprite>(path);
         }
 
         public static Sprite GetBackSprite()
         {
-            return Resources.Load<Sprite>("Card/back");
+            return Resources.Load<Sprite>("Cards/back");
         }
 
         public int GetBlackJackValue()
@@ -90,6 +91,8 @@ public class Card : MonoBehaviour
     private void UpdateVisual()
     {
         _image = GetComponent<Image>();
-        _image.sprite = IsReverse ? Data.GetBackSprite() : CardData.GetSprite();
+        Sprite sprite = IsReverse ? Data.GetBackSprite() : CardData.GetSprite();
+        Debug.Log($"sprite:{sprite},image:{_image}");
+        _image.sprite = sprite;
     }
 }
