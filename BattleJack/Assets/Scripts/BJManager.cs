@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 
 public class BJManager : MonoBehaviour
@@ -9,13 +9,13 @@ public class BJManager : MonoBehaviour
     [SerializeField] private Transform playerHandTransform;
     [SerializeField] private Transform dealerHandTransform;
 
-    // UIƒ{ƒ^ƒ“
+    // UIãƒœã‚¿ãƒ³
     [SerializeField] private Button hit;
     [SerializeField] private Button stand;
     [SerializeField] private Button doubleDown;
     [SerializeField] private Button split;
 
-    private Card _dealerHoleCard;   // ƒfƒB[ƒ‰[‚Ì•š‚¹D
+    private Card _dealerHoleCard;   // ãƒ‡ã‚£ãƒ¼ãƒ©ãƒ¼ã®ä¼ã›æœ­
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -28,32 +28,32 @@ public class BJManager : MonoBehaviour
 
     private void StartRound()
     {
-        // ƒ‰ƒEƒ“ƒhŠJnFƒJ[ƒh‚ğ2–‡‚¸‚Â”z‚é
+        // ãƒ©ã‚¦ãƒ³ãƒ‰é–‹å§‹ï¼šã‚«ãƒ¼ãƒ‰ã‚’2æšãšã¤é…ã‚‹
         playerHand.ClearHand();
         dealerHand.ClearHand();
 
-        // 2–‡‚¸‚Â”z‚é
-        AddCardToPlayer();
-        AddCardToDealer(isReverse: false); // ƒfƒB[ƒ‰[‚Ì1–‡–ÚF•\
-        AddCardToPlayer();
-        _dealerHoleCard = AddCardToDealer(isReverse: true); // ƒfƒB[ƒ‰[‚Ì2–‡–ÚF— 
+        // 2æšãšã¤é…ã‚‹
+        AddCardToPL();
+        AddCardToDL(isReverse: false); // ãƒ‡ã‚£ãƒ¼ãƒ©ãƒ¼ã®1æšç›®ï¼šè¡¨
+        AddCardToPL();
+        _dealerHoleCard = AddCardToDL(isReverse: true); // ãƒ‡ã‚£ãƒ¼ãƒ©ãƒ¼ã®2æšç›®ï¼šè£
 
-        // BJ”»’è
+        // BJåˆ¤å®š
         if (playerHand.IsBJ())
         {
             EndRound();
             return;
         }
 
-        SetButtonsActive(true);
-        UpdateSplitButton();
+        SetBtnActive(true);
+        UpdateSplitBtn();
     }
 
     // Player's ACT
 
     public void OnHit()
     {
-        AddCardToPlayer();
+        AddCardToPL();
 
         if (playerHand.IsBust())
         {
@@ -61,22 +61,22 @@ public class BJManager : MonoBehaviour
             return;
         }
 
-        // hitŒã‚ÍƒXƒvƒŠƒbƒgEƒ_ƒuƒ‹ƒ_ƒEƒ“•s‰Â
+        // hitå¾Œã¯ã‚¹ãƒ—ãƒªãƒƒãƒˆãƒ»ãƒ€ãƒ–ãƒ«ãƒ€ã‚¦ãƒ³ä¸å¯
         split.interactable = false;
         doubleDown.interactable = false;
     }
 
     public void OnStand()
     {
-        SetButtonsActive(false);
+        SetBtnActive(false);
         DealerTurn();
     }
 
     public void OnDoubleDown()
     {
-        // ƒJ[ƒh‚ğ1–‡‚¾‚¯’Ç‰Á‚µ‚Ä‚»‚Ì‚Ü‚ÜƒXƒ^ƒ“ƒh
-        AddCardToPlayer();
-        SetButtonsActive(false);
+        // ã‚«ãƒ¼ãƒ‰ã‚’1æšã ã‘è¿½åŠ ã—ã¦ãã®ã¾ã¾ã‚¹ã‚¿ãƒ³ãƒ‰
+        AddCardToPL();
+        SetBtnActive(false);
 
         if (playerHand.IsBust())
         {
@@ -89,32 +89,32 @@ public class BJManager : MonoBehaviour
 
     public void OnSplit()
     {
-        // ToDo: SplitÀ‘•
-        Debug.Log("Split: –¢À‘•");
+        // ToDo: Splitå®Ÿè£…
+        Debug.Log("Split: æœªå®Ÿè£…");
     }
 
-    // ƒfƒB[ƒ‰[‚Ìƒ^[ƒ“
+    // ãƒ‡ã‚£ãƒ¼ãƒ©ãƒ¼ã®ã‚¿ãƒ¼ãƒ³
 
     private void DealerTurn()
     {
-        // •š‚¹ƒJ[ƒh‚ğŒöŠJ
+        // ä¼ã›ã‚«ãƒ¼ãƒ‰ã‚’å…¬é–‹
         _dealerHoleCard.Flip(isReverse: false);
 
-        // 17ˆÈã‚É‚È‚é‚Ü‚Åˆø‚­
+        // 17ä»¥ä¸Šã«ãªã‚‹ã¾ã§å¼•ã
         while (dealerHand.GetTotalValue() < 17)
         {
-            AddCardToDealer(isReverse: false);
+            AddCardToDL(isReverse: false);
         }
 
         EndRound();
     }
 
-    // Ÿ”s”»’è
+    // å‹æ•—åˆ¤å®š
     private void EndRound()
     {
-        SetButtonActive(false);
+        SetBtnActive(false);
 
-        // •š‚¹ƒJ[ƒh‚ªc‚Á‚Ä‚¢‚½‚çƒI[ƒvƒ“
+        // ä¼ã›ã‚«ãƒ¼ãƒ‰ãŒæ®‹ã£ã¦ã„ãŸã‚‰ã‚ªãƒ¼ãƒ—ãƒ³
         if (_dealerHoleCard != null && _dealerHoleCard.IsReverse)
         {
             _dealerHoleCard.Flip(isReverse: false);
@@ -126,13 +126,46 @@ public class BJManager : MonoBehaviour
         RoundResult result = JudgeResult(playerTotal, dealerTotal);
         Debug.Log($"player: {playerTotal} / Dealer: {dealerTotal} -> {result}");
 
-        // ToDo: result‚É‰‚¶‚ÄHP‚Ì‘Œ¸ˆ—‚ğŒÄ‚Ô
+        // ToDo: resultã«å¿œã˜ã¦HPã®å¢—æ¸›å‡¦ç†ã‚’å‘¼ã¶
     }
 
     private enum RoundResult { PlayerBJ, PlayerWin, Lose, Draw }
 
     private RoundResult JudgeResult(int playerTotal, int dealerTotal)
     {
-        if (playerHand.IsBJ()) return RoundResult.PlayerBJ;
+        if (playerHand.IsBJ())          return RoundResult.PlayerBJ;
+        if (playerHand.IsBust())        return RoundResult.Lose;
+        if (dealerHand.IsBust())        return RoundResult.PlayerWin;
+        if (playerTotal > dealerTotal)  return RoundResult.PlayerWin;
+        if (playerTotal < dealerTotal)  return RoundResult.Lose;
+
+        return RoundResult.Draw;
+    }
+
+    private Card AddCardToPL()
+    {
+        Card card = deck.DrawCard(playerHandTransform);
+        playerHand.AddCard(card);
+        return card;
+    }
+
+    private Card AddCardToDL(bool isReverse)
+    {
+        Card card = deck.DrawCard(dealerHandTransform);
+        dealerHand.AddCard(card);
+        return card;
+    }
+
+    private void SetBtnActive(bool active)
+    {
+        hit.interactable = active;
+        stand.interactable = active;
+        doubleDown.interactable = active;
+        split.interactable = active;
+    }
+
+    private void UpdateSplitBtn()
+    {
+        split.interactable = playerHand.CanSplit();
     }
 }

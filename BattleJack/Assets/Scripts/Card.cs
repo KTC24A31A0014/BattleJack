@@ -89,7 +89,7 @@ public class Card : MonoBehaviour
 
     private void UpdateVisual()
     {
-        if (_image == null) _image = GetComponent<Image>();
+        _image = GetComponent<Image>();
         _image.sprite = IsReverse ? Data.GetBackSprite() : CardData.GetSprite();
     }
 }
