@@ -7,14 +7,20 @@ public class Hand : MonoBehaviour
 
     [SerializeField] private float cardSpacing = 240f;
 
-    // èD‚ÉƒJ[ƒh‚ğ’Ç‰Á
+    // æ‰‹æœ­ã«ã‚«ãƒ¼ãƒ‰ã‚’è¿½åŠ 
     public void AddCard(Card card)
     {
+        if (card == null)
+        {
+            Debug.LogError("nullã®ã‚«ãƒ¼ãƒ‰ãŒæ¸¡ã•ã‚ŒãŸã€‚");
+            return;
+        }
+
         _cards.Add(card);
         ArrangeCards();
     }
 
-    // ƒJ[ƒh‚ğ‰¡‚É•À‚×‚é
+    // ã‚«ãƒ¼ãƒ‰ã‚’æ¨ªã«ä¸¦ã¹ã‚‹
     private void ArrangeCards()
     {
         int count = _cards.Count;
@@ -24,11 +30,17 @@ public class Hand : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             RectTransform rt = _cards[i].GetComponent<RectTransform>();
+            // è¿½åŠ 
+            if (rt == null)
+            {
+                Debug.LogError($"RectTransformãŒã‚ã‚Šã¾ã›ã‚“: {_cards[i].gameObject.name}");
+                continue;
+            }
             rt.anchoredPosition = new Vector2(startX + i * cardSpacing, 0);
         }
     }
 
-    // ƒ‰ƒEƒ“ƒhI—¹[èD‚ğ‚·‚×‚ÄÌ‚Ä‚é
+    // ãƒ©ã‚¦ãƒ³ãƒ‰çµ‚äº†æ™‚ãƒ¼æ‰‹æœ­ã‚’ã™ã¹ã¦æ¨ã¦ã‚‹
     public void ClearHand()
     {
         foreach (Card card in _cards)
@@ -38,7 +50,7 @@ public class Hand : MonoBehaviour
         _cards.Clear();
     }
 
-    // èD‚Ì‡Œv“_‚ğ•Ô‚· (Ace = 11)
+    // æ‰‹æœ­ã®åˆè¨ˆç‚¹ã‚’è¿”ã™ (Ace = 11)
     public int GetTotalValue()
     {
         int total = 0;
@@ -51,7 +63,7 @@ public class Hand : MonoBehaviour
             if (card.CardData.Number == 1) aceCount++;
         }
 
-        // Ace ‚ğ11 ‚Æ‚µ‚Äˆµ‚¦‚é‚È‚ç1–‡‚¾‚¯11 ‚É‚·‚é
+        // Ace ã‚’11 ã¨ã—ã¦æ‰±ãˆã‚‹ãªã‚‰1æšã ã‘11 ã«ã™ã‚‹
         while (aceCount > 0 && total + 10 <= 21)
         {
             total += 10;
@@ -61,27 +73,39 @@ public class Hand : MonoBehaviour
         return total;
     }
 
-    // ƒo[ƒXƒg”»’è
+    // ãƒ‡ã‚£ãƒ¼ãƒ©ãƒ¼ã®è¡¨å‘ãã®ã‚«ãƒ¼ãƒ‰ã®ã¿åˆè¨ˆã‚’è¿”ã™
+    public int GetVisibleValue()
+    {
+        int total = 0;
+        int aceCount = 0;
+
+        foreach (Card card in _cards)
+        {
+            if (card.IsReverse) continue; // ä¼ã›ã‚«ãƒ¼ãƒ‰ã¯Skip
+
+            int value = card.CardData.GetBlackJackValue();
+            total += value;
+            if (card.CardData.Number == 1) aceCount++;
+        }
+
+        while (aceCount > 0 && total + 10 <= 21)
+        {
+            total += 10;
+            aceCount--;
+        }
+
+        return total;
+    }
+
+    // ãƒãƒ¼ã‚¹ãƒˆåˆ¤å®š
     public bool IsBust() => GetTotalValue() > 21;
 
-    // BJ”»’è@(Å‰‚Ì2–‡
+    // BJåˆ¤å®šã€€(æœ€åˆã®2æš
     public bool IsBJ() => _cards.Count == 2 && GetTotalValue() == 21;
 
-    // ƒXƒvƒŠƒbƒg‚Ì‰Â”Û
+    // ã‚¹ãƒ—ãƒªãƒƒãƒˆã®å¯å¦
     public bool CanSplit() => _cards.Count == 2 && _cards[0].CardData.IsSameValueAs(_cards[1].CardData);
 
-    // èD‚Ì–‡”
+    // æ‰‹æœ­ã®æšæ•°
     public int CardCount => _cards.Count;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

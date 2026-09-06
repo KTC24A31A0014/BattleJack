@@ -7,7 +7,7 @@ public class Deck : MonoBehaviour
 
     private List<Card.Data> _deck = new List<Card.Data>();
 
-    // 52–‡‚ÌRD‚ğ¶¬ -> ƒVƒƒƒbƒtƒ‹
+    // 52æšã®å±±æœ­ã‚’ç”Ÿæˆ -> ã‚·ãƒ£ãƒƒãƒ•ãƒ«
     public void SetUpDeck()
     {
         _deck.Clear();
@@ -23,7 +23,7 @@ public class Deck : MonoBehaviour
         Shuffle();
     }
 
-    // ƒVƒƒƒbƒtƒ‹
+    // ã‚·ãƒ£ãƒƒãƒ•ãƒ«
     private void Shuffle()
     {
         for (int i = _deck.Count - 1; i > 0; i--)
@@ -33,14 +33,14 @@ public class Deck : MonoBehaviour
         }
     }
 
-    // RD‚©‚ç1–‡ƒhƒ[
+    // å±±æœ­ã‹ã‚‰1æšãƒ‰ãƒ­ãƒ¼
     public Card DrawCard(Transform parent, bool isReverse = false)
 
     {
-        if (_deck.Count == 0)
+        if (_deck.Count <= 15)
         {
-            Debug.LogWarning("RD‚ª‹ó‚Å‚·B");
-            return null;
+            Debug.LogWarning("å±±æœ­ã‚’ã‚·ãƒ£ãƒƒãƒ•ãƒ«ã—ã¦è£œå……");
+            SetUpDeck();
         }
 
         Card.Data data = _deck[0];
@@ -53,6 +53,6 @@ public class Deck : MonoBehaviour
         return card;
     }
 
-    // c‚è–‡”‚ÌŠm”F
+    // æ®‹ã‚Šæšæ•°ã®ç¢ºèª
     public int RemainingCount => _deck.Count;
 }

@@ -1,13 +1,19 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class BJManager : MonoBehaviour
 {
+    // 手札関連
     [SerializeField] private Deck deck;
     [SerializeField] private Hand playerHand;
     [SerializeField] private Hand dealerHand;
     [SerializeField] private Transform playerHandTransform;
     [SerializeField] private Transform dealerHandTransform;
+
+    // Status
+    [SerializeField] private CharacterStatus playerStatus;
+    [SerializeField] private CharacterStatus dealerStatus;
+    [SerializeField] private GameUI gameUI;
 
     // UIボタン
     [SerializeField] private Button hit;
@@ -15,12 +21,17 @@ public class BJManager : MonoBehaviour
     [SerializeField] private Button doubleDown;
     [SerializeField] private Button split;
 
+
+    // 賭けることができるHP量
+    [SerializeField] private int betAmount = 5;
+
     private Card _dealerHoleCard;   // ディーラーの伏せ札
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         deck.SetUpDeck();
+        UpdateHpUI();
         StartRound();
     }
 
@@ -32,11 +43,18 @@ public class BJManager : MonoBehaviour
         playerHand.ClearHand();
         dealerHand.ClearHand();
 
+        gameUI.HideResult();
+        gameUI.UpdateDLScore(0);
+
         // 2枚ずつ配る
         AddCardToPL();
         AddCardToDL(isReverse: false); // ディーラーの1枚目：表
         AddCardToPL();
         _dealerHoleCard = AddCardToDL(isReverse: true); // ディーラーの2枚目：裏
+
+        // PLの合計表示
+        UpdatePLScoreUI();
+        UpdateDLScoreUI();
 
         // BJ判定
         if (playerHand.IsBJ())
@@ -54,6 +72,7 @@ public class BJManager : MonoBehaviour
     public void OnHit()
     {
         AddCardToPL();
+        UpdatePLScoreUI();
 
         if (playerHand.IsBust())
         {
@@ -76,6 +95,7 @@ public class BJManager : MonoBehaviour
     {
         // カードを1枚だけ追加してそのままスタンド
         AddCardToPL();
+        UpdatePLScoreUI();
         SetBtnActive(false);
 
         if (playerHand.IsBust())
@@ -106,6 +126,7 @@ public class BJManager : MonoBehaviour
             AddCardToDL(isReverse: false);
         }
 
+        gameUI.UpdateDLScore(dealerHand.GetTotalValue());
         EndRound();
     }
 
@@ -118,6 +139,7 @@ public class BJManager : MonoBehaviour
         if (_dealerHoleCard != null && _dealerHoleCard.IsReverse)
         {
             _dealerHoleCard.Flip(isReverse: false);
+            gameUI.UpdateDLScore(dealerHand.GetTotalValue());
         }
 
         int playerTotal = playerHand.GetTotalValue();
@@ -127,17 +149,60 @@ public class BJManager : MonoBehaviour
         Debug.Log($"player: {playerTotal} / Dealer: {dealerTotal} -> {result}");
 
         // ToDo: resultに応じてHPの増減処理を呼ぶ
+        ApplyResult(result);
+        UpdateHpUI();
+
+        // GameOver処理
+        if (playerStatus.IsDead() || dealerStatus.IsDead())
+        {
+            gameUI.ShowResult(playerStatus.IsDead() ? "GAME OVER" : "YOU WIN!");
+            return;
+        }
+
+        // Next Round
+        Invoke(nameof(StartRound), 2f);
+    }
+
+    private void ApplyResult(RoundResult result)
+    {
+        switch (result)
+        {
+            case RoundResult.PlayerBJ:
+                // BJ:DLにベット数の1.5倍ダメージ、PLはその1.5倍回復
+                int bjDamage = Mathf.RoundToInt(betAmount * 1.5f);
+                dealerStatus.TakeDamage(bjDamage);
+                gameUI.ShowResult("BLACK JACK !!!");
+                break;
+
+            case RoundResult.PlayerWin:
+                // 勝ち:DLにベット数ダメージ、PLその数回復
+                dealerStatus.TakeDamage(betAmount);
+                playerStatus.Heal(betAmount);
+                gameUI.ShowResult("WIN!");
+                break;
+
+            case RoundResult.Lose:
+                // 負け:PLにベット数分のダメージ
+                playerStatus.TakeDamage(betAmount);
+                gameUI.ShowResult("LOSE...");
+                break;
+
+            case RoundResult.Draw:
+                // 引き分け:HP変動なし
+                gameUI.ShowResult("DRAW");
+                break;
+        }
     }
 
     private enum RoundResult { PlayerBJ, PlayerWin, Lose, Draw }
 
     private RoundResult JudgeResult(int playerTotal, int dealerTotal)
     {
-        if (playerHand.IsBJ())          return RoundResult.PlayerBJ;
-        if (playerHand.IsBust())        return RoundResult.Lose;
-        if (dealerHand.IsBust())        return RoundResult.PlayerWin;
-        if (playerTotal > dealerTotal)  return RoundResult.PlayerWin;
-        if (playerTotal < dealerTotal)  return RoundResult.Lose;
+        if (playerHand.IsBJ()) return RoundResult.PlayerBJ;
+        if (playerHand.IsBust()) return RoundResult.Lose;
+        if (dealerHand.IsBust()) return RoundResult.PlayerWin;
+        if (playerTotal > dealerTotal) return RoundResult.PlayerWin;
+        if (playerTotal < dealerTotal) return RoundResult.Lose;
 
         return RoundResult.Draw;
     }
@@ -167,5 +232,21 @@ public class BJManager : MonoBehaviour
     private void UpdateSplitBtn()
     {
         split.interactable = playerHand.CanSplit();
+    }
+
+    private void UpdateHpUI()
+    {
+        gameUI.UpdatePlayerHp(playerStatus.CurrentHp, playerStatus.MaxHp);
+        gameUI.UpdateDealerHp(dealerStatus.CurrentHp, dealerStatus.MaxHp);
+    }
+
+    private void UpdatePLScoreUI()
+    {
+        gameUI.UpdatePlayerScore(playerHand.GetTotalValue());
+    }
+
+    private void UpdateDLScoreUI()
+    {
+        gameUI.UpdateDLScore(dealerHand.GetVisibleValue());
     }
 }
