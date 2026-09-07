@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class BJManager : MonoBehaviour
@@ -23,15 +24,45 @@ public class BJManager : MonoBehaviour
 
 
     // 賭けることができるHP量
-    [SerializeField] private int betAmount = 5;
+    private int betAmount = 1;
+
+    // ラウンドカウント
+    private int _roundCount = 0;
 
     private Card _dealerHoleCard;   // ディーラーの伏せ札
+
+    /// <summary>
+    /// Split用
+    /// 
+    /// private bool _IsSplitting = false;
+    ///private Hand _splitHand1;
+    ///private Hand _splitHand2;
+    ///private int _splitHand1Result = 0;
+    ///private int _splitHand2Result = 0;
+    ///private bool IsPLHand2 = false;     // 現在２つ目をプレイ中か
+    ///
+    ///[SerializeField] private Transform splitHandTransform; // 2つめの手札を置く場所
+    /// </summary>
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         deck.SetUpDeck();
         UpdateHpUI();
+        ShowBetPhase();
+    }
+
+    // ベット入力フェーズ
+    private void ShowBetPhase()
+    {
+        gameUI.ShowBetPanel(playerStatus.CurrentHp);
+    }
+
+    public void OnBetConfirm()
+    {
+        betAmount = gameUI.GetBetAmount();
+        gameUI.HideBetPanel();
         StartRound();
     }
 
@@ -39,6 +70,9 @@ public class BJManager : MonoBehaviour
 
     private void StartRound()
     {
+        // ラウンド数のカウント
+        _roundCount++;
+
         // ラウンド開始：カードを2枚ずつ配る
         playerHand.ClearHand();
         dealerHand.ClearHand();
@@ -155,12 +189,13 @@ public class BJManager : MonoBehaviour
         // GameOver処理
         if (playerStatus.IsDead() || dealerStatus.IsDead())
         {
-            gameUI.ShowResult(playerStatus.IsDead() ? "GAME OVER" : "YOU WIN!");
+            bool playerWin = dealerStatus.IsDead();
+            ShowGameOver(playerWin);
             return;
         }
 
         // Next Round
-        Invoke(nameof(StartRound), 2f);
+        Invoke(nameof(ShowBetPhase), 2f);
     }
 
     private void ApplyResult(RoundResult result)
@@ -205,6 +240,23 @@ public class BJManager : MonoBehaviour
         if (playerTotal < dealerTotal) return RoundResult.Lose;
 
         return RoundResult.Draw;
+    }
+
+    private void ShowGameOver(bool playerWin)
+    {
+        gameUI.ShowResult(playerWin ? "YOU WIN!" : "GAME OVER");
+        gameUI.ShowGameOver(playerWin, _roundCount);
+    }
+
+    // GameOverUIのボタン
+    public void OnRetry()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void OnBackToTitle()
+    {
+        SceneManager.LoadScene("TitleScene");
     }
 
     private Card AddCardToPL()

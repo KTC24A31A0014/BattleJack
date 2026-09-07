@@ -97,6 +97,16 @@ public class Hand : MonoBehaviour
         return total;
     }
 
+    // Splitで手札を１枚取り出す
+    //public Card RemoveFirstCard()
+    //{
+    //    if (_cards.Count == 0) return null;
+    //    Card card = _cards[0];
+    //    _cards.RemoveAt(0);
+    //    ArrangeCards();
+    //    return card;
+    //}
+
     // バースト判定
     public bool IsBust() => GetTotalValue() > 21;
 
