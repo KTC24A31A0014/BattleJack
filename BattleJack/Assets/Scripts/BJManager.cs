@@ -22,6 +22,9 @@ public class BJManager : MonoBehaviour
     [SerializeField] private Button doubleDown;
     [SerializeField] private Button split;
 
+    // デッキの位置
+    [SerializeField] private RectTransform deckTransform;
+
 
     // 賭けることができるHP量
     private int betAmount = 1;
@@ -200,12 +203,16 @@ public class BJManager : MonoBehaviour
 
     private void ApplyResult(RoundResult result)
     {
+        int playerTotal = playerHand.GetTotalValue();
+        int dealerTotal = dealerHand.GetTotalValue();
+
         switch (result)
         {
             case RoundResult.PlayerBJ:
                 // BJ:DLにベット数の1.5倍ダメージ、PLはその1.5倍回復
                 int bjDamage = Mathf.RoundToInt(betAmount * 1.5f);
                 dealerStatus.TakeDamage(bjDamage);
+                playerStatus.Heal(bjDamage);
                 gameUI.ShowResult("BLACK JACK !!!");
                 break;
 
@@ -218,6 +225,9 @@ public class BJManager : MonoBehaviour
 
             case RoundResult.Lose:
                 // 負け:PLにベット数分のダメージ
+                int extraDamage = playerHand.IsBust()
+                    ? playerTotal - 21
+                    : playerTotal - playerTotal;
                 playerStatus.TakeDamage(betAmount);
                 gameUI.ShowResult("LOSE...");
                 break;
@@ -300,5 +310,25 @@ public class BJManager : MonoBehaviour
     private void UpdateDLScoreUI()
     {
         gameUI.UpdateDLScore(dealerHand.GetVisibleValue());
+    }
+
+    // アニメーション 10/07
+    private Vector2 GetDeckPosition()
+    {
+        return deckTransform.anchoredPosition;
+    }
+
+    private Card AddCardToPL()
+    {
+        Card card = deck.DrawCard(playerHandTransform, false, GetDeckPosition());
+        playerHand.AddCard(card);
+        return card;
+    }
+
+    private Card AddCardToDL(bool isReverse)
+    {
+        AddCardToDL card = deck.DrawCard(dealerHandTransform, isReverse, GetDeckPosition());
+        dealerHand.AddCard(card);
+        return card;
     }
 }

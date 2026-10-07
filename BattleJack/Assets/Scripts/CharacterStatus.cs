@@ -3,6 +3,7 @@ using UnityEngine;
 public class CharacterStatus : MonoBehaviour
 {
     [SerializeField] private int maxHp;
+    [SerializeField] private float healMultiplier = 1.0f;
 
     public int MaxHp => maxHp;
     public int CurrentHp {  get; private set; }
@@ -21,9 +22,10 @@ public class CharacterStatus : MonoBehaviour
     }
 
     // 回復(もはや吸血)(最大HPを超えない)
-    public void Heal(int amount)
+    public void Heal(int baseAmount)
     {
-        CurrentHp = Mathf.Min(MaxHp, CurrentHp + amount);
+        int healAmount = Mathf.RoundToInt(baseAmount * healMultiplier);
+        CurrentHp = Mathf.Min(MaxHp, CurrentHp + healAmount);
     }
 
     private void Die()

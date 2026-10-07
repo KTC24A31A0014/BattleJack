@@ -34,7 +34,7 @@ public class Deck : MonoBehaviour
     }
 
     // 山札から1枚ドロー
-    public Card DrawCard(Transform parent, bool isReverse = false)
+    public Card DrawCard(Transform parent, bool isReverse = false, Vector2? dealFrom = null)
 
     {
         if (_deck.Count <= 15)
@@ -49,6 +49,13 @@ public class Deck : MonoBehaviour
         GameObject obj = Instantiate(cardPrefabs, parent);
         Card card = obj.GetComponent<Card>();
         card.SetCard(data, isReverse);
+
+        // アニメーション再生
+        if (dealFrom.HasValue)
+        {
+            card.PlayDealAnimation(dealFrom.Value);
+        }
+
 
         return card;
     }

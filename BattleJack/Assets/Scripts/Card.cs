@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-
-
+using DG.Tweening;
 
 public class Card : MonoBehaviour
 {
@@ -94,5 +93,16 @@ public class Card : MonoBehaviour
         Sprite sprite = IsReverse ? Data.GetBackSprite() : CardData.GetSprite();
         Debug.Log($"sprite:{sprite},image:{_image}");
         _image.sprite = sprite;
+    }
+
+    // 指定位置からスライドインする
+    public void PlayDealAnimetion(Vector2 fromPosition, float duration = 0.3f)
+    {
+        RectTransform rt = GetComponent<RectTransform>();
+        Vector2 targetPosition = rt.anchoredPosition;
+
+        // 開始位置にポップしてからアニメ
+        rt.anchoredPosition = fromPosition;
+        rt.DOAnchorPos(targetPosition, duration).SetEase(Ease.OutCubic);
     }
 }
