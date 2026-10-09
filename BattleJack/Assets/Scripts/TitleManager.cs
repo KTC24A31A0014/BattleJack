@@ -7,4 +7,9 @@ public class TitleManager : MonoBehaviour
     {
         SceneManager.LoadScene("GameScene");
     }
+
+    public void OnTutorial()
+    {
+        SceneManager.LoadScene("TutorialScene");
+    }
 }

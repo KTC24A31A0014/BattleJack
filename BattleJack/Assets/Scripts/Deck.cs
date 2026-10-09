@@ -53,7 +53,7 @@ public class Deck : MonoBehaviour
         // アニメーション再生
         if (dealFrom.HasValue)
         {
-            card.PlayDealAnimation(dealFrom.Value);
+            card.SetDealStartPosition(dealFrom.Value);
         }
 
 

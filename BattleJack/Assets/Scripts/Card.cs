@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 
@@ -95,14 +95,9 @@ public class Card : MonoBehaviour
         _image.sprite = sprite;
     }
 
-    // 指定位置からスライドインする
-    public void PlayDealAnimetion(Vector2 fromPosition, float duration = 0.3f)
+    // 配り始めの位置にカードを置く。
+    public void SetDealStartPosition(Vector3 worldPosition)
     {
-        RectTransform rt = GetComponent<RectTransform>();
-        Vector2 targetPosition = rt.anchoredPosition;
-
-        // 開始位置にポップしてからアニメ
-        rt.anchoredPosition = fromPosition;
-        rt.DOAnchorPos(targetPosition, duration).SetEase(Ease.OutCubic);
+        transform.position = worldPosition;
     }
 }

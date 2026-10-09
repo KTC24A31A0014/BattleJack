@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -57,8 +58,11 @@ public class BJManager : MonoBehaviour
     }
 
     // ベット入力フェーズ
+    // Score hide
     private void ShowBetPhase()
     {
+        gameUI.HideScores();
+        gameUI.HideResult();
         gameUI.ShowBetPanel(playerStatus.CurrentHp);
     }
 
@@ -73,31 +77,36 @@ public class BJManager : MonoBehaviour
 
     private void StartRound()
     {
-        // ラウンド数のカウント
         _roundCount++;
-
-        // ラウンド開始：カードを2枚ずつ配る
         playerHand.ClearHand();
         dealerHand.ClearHand();
-
         gameUI.HideResult();
-        gameUI.UpdateDLScore(0);
 
-        // 2枚ずつ配る
-        AddCardToPL();
-        AddCardToDL(isReverse: false); // ディーラーの1枚目：表
-        AddCardToPL();
-        _dealerHoleCard = AddCardToDL(isReverse: true); // ディーラーの2枚目：裏
+        StartCoroutine(DealCardsRoutine());
+    }
 
-        // PLの合計表示
+    private IEnumerator DealCardsRoutine()
+    {
+        // 1毎ずつ間をあけて配る
+        AddCardToPL();
+        yield return new WaitForSeconds(0.35f);
+
+        AddCardToDL(isReverse: false);
+        yield return new WaitForSeconds(0.35f);
+
+        AddCardToPL();
+        yield return new WaitForSeconds(0.35f);
+
+        _dealerHoleCard = AddCardToDL(isReverse: true);
+        yield return new WaitForSeconds(0.35f);
+
         UpdatePLScoreUI();
         UpdateDLScoreUI();
 
-        // BJ判定
         if (playerHand.IsBJ())
         {
             EndRound();
-            return;
+            yield break;
         }
 
         SetBtnActive(true);
@@ -125,12 +134,11 @@ public class BJManager : MonoBehaviour
     public void OnStand()
     {
         SetBtnActive(false);
-        DealerTurn();
+        StartCoroutine(DealerTurnRoutine()); // DealerTurn()から変更
     }
 
     public void OnDoubleDown()
     {
-        // カードを1枚だけ追加してそのままスタンド
         AddCardToPL();
         UpdatePLScoreUI();
         SetBtnActive(false);
@@ -141,7 +149,7 @@ public class BJManager : MonoBehaviour
             return;
         }
 
-        DealerTurn();
+        StartCoroutine(DealerTurnRoutine()); // DealerTurn()から変更
     }
 
     public void OnSplit()
@@ -152,18 +160,21 @@ public class BJManager : MonoBehaviour
 
     // ディーラーのターン
 
-    private void DealerTurn()
+    private IEnumerator DealerTurnRoutine()
     {
-        // 伏せカードを公開
+        // 伏せ札を公開して少し間を置く
         _dealerHoleCard.Flip(isReverse: false);
+        gameUI.UpdateDLScore(dealerHand.GetTotalValue());
+        yield return new WaitForSeconds(0.6f);
 
-        // 17以上になるまで引く
+        // 17以上になるまで1枚ずつ引く
         while (dealerHand.GetTotalValue() < 17)
         {
             AddCardToDL(isReverse: false);
+            gameUI.UpdateDLScore(dealerHand.GetTotalValue());
+            yield return new WaitForSeconds(0.6f);
         }
 
-        gameUI.UpdateDLScore(dealerHand.GetTotalValue());
         EndRound();
     }
 
@@ -211,25 +222,29 @@ public class BJManager : MonoBehaviour
             case RoundResult.PlayerBJ:
                 // BJ:DLにベット数の1.5倍ダメージ、PLはその1.5倍回復
                 int bjDamage = Mathf.RoundToInt(betAmount * 1.5f);
-                dealerStatus.TakeDamage(bjDamage);
-                playerStatus.Heal(bjDamage);
+                gameUI.ShowPopup(false, dealerStatus.TakeDamage(bjDamage), false);
+                gameUI.ShowPopup(true, playerStatus.Heal(bjDamage), true);
                 gameUI.ShowResult("BLACK JACK !!!");
+                gameUI.ShakeScreen(15f, 0.3f);
+                gameUI.ShakeDealer(30f, 0.45f);
                 break;
 
             case RoundResult.PlayerWin:
                 // 勝ち:DLにベット数ダメージ、PLその数回復
-                dealerStatus.TakeDamage(betAmount);
-                playerStatus.Heal(betAmount);
+                gameUI.ShowPopup(false, dealerStatus.TakeDamage(betAmount), false);
+                gameUI.ShowPopup(true, playerStatus.Heal(betAmount), true);
                 gameUI.ShowResult("WIN!");
+                gameUI.ShakeDealer();
                 break;
 
             case RoundResult.Lose:
                 // 負け:PLにベット数分のダメージ
                 int extraDamage = playerHand.IsBust()
                     ? playerTotal - 21
-                    : playerTotal - playerTotal;
-                playerStatus.TakeDamage(betAmount);
+                    : dealerTotal - playerTotal;
+                gameUI.ShowPopup(true, playerStatus.TakeDamage(betAmount + extraDamage), false);
                 gameUI.ShowResult("LOSE...");
+                gameUI.ShakeScreen(30f, 0.45f);
                 break;
 
             case RoundResult.Draw:
@@ -269,17 +284,17 @@ public class BJManager : MonoBehaviour
         SceneManager.LoadScene("TitleScene");
     }
 
-    private Card AddCardToPL()
+    private Card AddCardToDL(bool isReverse)
     {
-        Card card = deck.DrawCard(playerHandTransform);
-        playerHand.AddCard(card);
+        Card card = deck.DrawCard(dealerHandTransform, isReverse, GetDeckPosition());
+        dealerHand.AddCard(card);
         return card;
     }
 
-    private Card AddCardToDL(bool isReverse)
+    private Card AddCardToPL()
     {
-        Card card = deck.DrawCard(dealerHandTransform, isReverse);
-        dealerHand.AddCard(card);
+        Card card = deck.DrawCard(playerHandTransform, false, GetDeckPosition());
+        playerHand.AddCard(card);
         return card;
     }
 
@@ -304,7 +319,7 @@ public class BJManager : MonoBehaviour
 
     private void UpdatePLScoreUI()
     {
-        gameUI.UpdatePlayerScore(playerHand.GetTotalValue());
+        gameUI.UpdatePLScore(playerHand.GetTotalValue());
     }
 
     private void UpdateDLScoreUI()
@@ -313,22 +328,8 @@ public class BJManager : MonoBehaviour
     }
 
     // アニメーション 10/07
-    private Vector2 GetDeckPosition()
+    private Vector3 GetDeckPosition()
     {
-        return deckTransform.anchoredPosition;
-    }
-
-    private Card AddCardToPL()
-    {
-        Card card = deck.DrawCard(playerHandTransform, false, GetDeckPosition());
-        playerHand.AddCard(card);
-        return card;
-    }
-
-    private Card AddCardToDL(bool isReverse)
-    {
-        AddCardToDL card = deck.DrawCard(dealerHandTransform, isReverse, GetDeckPosition());
-        dealerHand.AddCard(card);
-        return card;
+        return deckTransform.position;
     }
 }

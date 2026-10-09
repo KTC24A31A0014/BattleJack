@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class Hand : MonoBehaviour
 {
@@ -30,13 +31,10 @@ public class Hand : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             RectTransform rt = _cards[i].GetComponent<RectTransform>();
-            // 追加
-            if (rt == null)
-            {
-                Debug.LogError($"RectTransformがありません: {_cards[i].gameObject.name}");
-                continue;
-            }
-            rt.anchoredPosition = new Vector2(startX + i * cardSpacing, 0);
+            Vector2 target = new Vector2(startX + i * cardSpacing, 0);
+
+            rt.DOKill();
+            rt.DOAnchorPos(target, 0.3f).SetEase(Ease.OutCubic);
         }
     }
 

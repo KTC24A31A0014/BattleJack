@@ -15,17 +15,25 @@ public class CharacterStatus : MonoBehaviour
     }
 
     // ダメージを受ける
-    public void TakeDamage(int amount)
+    public int TakeDamage(int amount)
     {
+        int before = CurrentHp;
+
         CurrentHp = Mathf.Max(0, CurrentHp - amount);
         if (CurrentHp == 0) Die();
+
+        return before - CurrentHp;
     }
 
     // 回復(もはや吸血)(最大HPを超えない)
-    public void Heal(int baseAmount)
+    public int Heal(int baseAmount)
     {
+        int before = CurrentHp;
+
         int healAmount = Mathf.RoundToInt(baseAmount * healMultiplier);
         CurrentHp = Mathf.Min(MaxHp, CurrentHp + healAmount);
+
+        return CurrentHp - before;
     }
 
     private void Die()
